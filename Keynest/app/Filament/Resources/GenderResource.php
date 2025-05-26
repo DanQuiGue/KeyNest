@@ -23,14 +23,30 @@ class GenderResource extends Resource
     protected static ?string $model = Gender::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $slug = 'genero';
 
+    public static function getModelLabel(): string
+    {
+        return 'Genero';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Generos';
+    }
+    public static function getForm():array
+    {
+        return[
+                TextInput::make('name')
+                    ->label('Nombre')
+                    ->required(),
+
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                TextInput::make('name')->required(),
-                
-            ]);
+            ->schema(self::getForm());
     }
 
     public static function table(Table $table): Table
@@ -38,10 +54,10 @@ class GenderResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
-                
+
             ])
             ->filters([
-                
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

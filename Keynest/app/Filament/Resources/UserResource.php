@@ -27,6 +27,18 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    //protected static ?string $navigationLabel = 'DOCUMENTACIONES';
+    protected static ?string $slug = 'usuarios';
+
+    public static function getModelLabel(): string
+    {
+        return 'Usuario';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Usuarios';
+    }
 
     public static function form(Form $form): Form
     {
@@ -50,6 +62,7 @@ class UserResource extends Resource
                     ->email()
                     ->required(),
                 TextInput::make('password')
+                    ->label('Contraseña')
                     ->password()
                     ->required(),
 
@@ -61,15 +74,26 @@ class UserResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nombre')
                     ->searchable(),
                 TextColumn::make('surname')
+                    ->label('Apellido')
                     ->searchable(),
                 TextColumn::make('email')
                     ->searchable(),
                 TextColumn::make('email_verified_at')
+                    ->label('Email Verificado el')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('type')
+                    ->label('Tipo de usuario')
+                    ->formatStateUsing(function ($state) {
+                        return [
+                            'user' => 'Usuario',
+                            'company' => 'Empresa',
+                        ][$state] ?? $state;
+                    })
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()

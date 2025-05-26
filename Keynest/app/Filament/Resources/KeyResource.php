@@ -23,6 +23,17 @@ class KeyResource extends Resource
     protected static ?string $model = Key::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+        protected static ?string $slug = 'keys';
+
+    public static function getModelLabel(): string
+    {
+        return 'Key';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Keys';
+    }
 
     public static function form(Form $form): Form
     {
@@ -31,7 +42,7 @@ class KeyResource extends Resource
                 TextInput::make('game_id'),
                 TextInput::make('key')->required(),
                 TextInput::make('used'),
-                
+
             ]);
     }
 
@@ -42,10 +53,10 @@ class KeyResource extends Resource
                 TextColumn::make('game_id'),
                 TextColumn::make('key'),
                 TextColumn::make('used'),
-                
+
             ])
             ->filters([
-                
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

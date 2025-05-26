@@ -10,13 +10,19 @@ class Game extends Model
 
     //
 
-    public function user()
+    public function company()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->where('type', 'company');
     }
 
     public function gender()
     {
         return $this->belongsTo(Gender::class);
+    }
+
+
+    public function keys()
+    {
+        return $this->hasMany(Key::class);
     }
 }
