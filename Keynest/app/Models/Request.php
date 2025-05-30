@@ -20,9 +20,9 @@ class Request extends Model
         return $this->belongsTo(Key::class);
     }
 
-    public function user()
+    public function influencer()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->where('type','user');
     }
 
 }

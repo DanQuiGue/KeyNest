@@ -11,9 +11,14 @@ use App\Filament\Resources\KeyResource\Pages;
 use App\Filament\Resources\KeyResource\RelationManagers;
 use App\Models\Key;
 use Filament\Forms;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -35,35 +40,46 @@ class KeyResource extends Resource
         return 'Keys';
     }
 
+    public static function getForm():array
+    {
+        return[
+                Select::make('game_id')
+                    ->label('Juego')
+                    ->relationship('game','title'),
+
+                TextInput::make('key')->required(),
+                Toggle::make('used'),
+
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                TextInput::make('game_id'),
-                TextInput::make('key')->required(),
-                TextInput::make('used'),
-
-            ]);
+            ->schema(self::getForm());
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('game_id'),
+                TextColumn::make('game.title')
+                    ->label('Juego'),
                 TextColumn::make('key'),
-                TextColumn::make('used'),
+                ToggleColumn::make('used')
+                    ->label('Usado')
+                    ->disabled(),
+
 
             ])
             ->filters([
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

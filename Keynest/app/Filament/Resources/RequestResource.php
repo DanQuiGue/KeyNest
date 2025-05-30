@@ -9,8 +9,10 @@ use Filament\Tables\Filters\SelectFilter;
 
 use App\Filament\Resources\RequestResource\Pages;
 use App\Filament\Resources\RequestResource\RelationManagers;
+use App\Models\Key;
 use App\Models\Request;
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -28,11 +30,14 @@ class RequestResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('influencer_id'),
-                TextInput::make('game_id'),
-                TextInput::make('key_id'),
-                TextInput::make('status'),
-                
+                Select::make('influencer_id')
+                    ->relationship('influencer','name'),
+                Select::make('game_id')
+                    ->relationship('game','title'),
+                Hidden::make('key_id')
+                    ->default(Key::where('used',false)),
+                Select::make('status'),
+
             ]);
     }
 
@@ -44,10 +49,10 @@ class RequestResource extends Resource
                 TextColumn::make('game_id'),
                 TextColumn::make('key_id'),
                 TextColumn::make('status'),
-                
+
             ])
             ->filters([
-                
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
