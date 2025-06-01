@@ -22,13 +22,25 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class KeyResource extends Resource
 {
     protected static ?string $model = Key::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-        protected static ?string $slug = 'keys';
+    protected static ?string $slug = 'keys';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==1){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     public static function getModelLabel(): string
     {

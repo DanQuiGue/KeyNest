@@ -17,13 +17,35 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class RatingResource extends Resource
 {
     protected static ?string $model = Rating::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $slug = 'calificacion';
 
+    public static function getModelLabel(): string
+    {
+        return 'Calificación';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Calificaciones';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==2 || $id==1){
+            return true;
+        }else{
+            return false;
+        }
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -32,7 +54,7 @@ class RatingResource extends Resource
                 TextInput::make('studio_id'),
                 TextInput::make('request_id'),
                 TextInput::make('rate'),
-                
+
             ]);
     }
 
@@ -44,10 +66,10 @@ class RatingResource extends Resource
                 TextColumn::make('studio_id'),
                 TextColumn::make('request_id'),
                 TextColumn::make('rate'),
-                
+
             ])
             ->filters([
-                
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

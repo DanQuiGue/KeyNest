@@ -40,7 +40,6 @@ class GenderResource extends Resource
                 TextInput::make('name')
                     ->label('Nombre')
                     ->required(),
-
         ];
     }
     public static function form(Form $form): Form
