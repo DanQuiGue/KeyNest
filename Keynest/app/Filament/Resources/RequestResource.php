@@ -56,9 +56,14 @@ class RequestResource extends Resource
                 Select::make('influencer_id')
                     ->relationship('influencer','name'),
                 Select::make('game_id')
-                    ->relationship('game','title'),
-                Hidden::make('key_id')
-                    ->default(Key::where('used',false)),
+                    ->relationship('game','title')
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $firstAvailableKeyId = Key::where('used', false)->where('game_id', $state)->value('id');
+                        dd($firstAvailableKeyId);
+                        $set('key_id', $firstAvailableKeyId);
+                    }),
+                Hidden::make('key_id'),
                 Select::make('status'),
 
             ]);
@@ -70,7 +75,7 @@ class RequestResource extends Resource
             ->columns([
                 TextColumn::make('influencer_id'),
                 TextColumn::make('game_id'),
-                TextColumn::make('key_id'),
+                //TextColumn::make('key_id'),
                 TextColumn::make('status'),
 
             ])

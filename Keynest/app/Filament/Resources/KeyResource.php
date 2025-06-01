@@ -64,6 +64,19 @@ class KeyResource extends Resource
 
         ];
     }
+    public static function getColumnTables():array
+    {
+        return [
+                TextColumn::make('game.title')
+                    ->label('Juego')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('key'),
+                ToggleColumn::make('used')
+                    ->label('Usado')
+                    ->disabled(),
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -73,16 +86,7 @@ class KeyResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('game.title')
-                    ->label('Juego'),
-                TextColumn::make('key'),
-                ToggleColumn::make('used')
-                    ->label('Usado')
-                    ->disabled(),
-
-
-            ])
+            ->columns(self::getColumnTables())
             ->filters([
 
             ])

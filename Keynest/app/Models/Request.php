@@ -12,7 +12,9 @@ class Request extends Model
 
     public function game()
     {
-        return $this->belongsTo(Game::class);
+        return $this->belongsTo(Game::class)->whereHas('keys', function ($query) {
+            $query->where('used', false);
+        });
     }
 
     public function key()

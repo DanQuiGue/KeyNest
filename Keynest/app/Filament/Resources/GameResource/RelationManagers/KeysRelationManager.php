@@ -30,9 +30,7 @@ class KeysRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('key')
-            ->columns([
-                Tables\Columns\TextColumn::make('key'),
-            ])
+            ->columns(KeyResource::getColumnTables())
             ->filters([
                 //
             ])
