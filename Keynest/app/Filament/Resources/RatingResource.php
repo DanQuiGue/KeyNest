@@ -9,7 +9,9 @@ use Filament\Tables\Filters\SelectFilter;
 
 use App\Filament\Resources\RatingResource\Pages;
 use App\Filament\Resources\RatingResource\RelationManagers;
-use App\Models\Rating;
+use Mokhosh\FilamentRating\Components\Rating;
+use Mokhosh\FilamentRating\Columns\RatingColumn;
+use Filament\Support\Colors\Color;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,10 +20,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Mokhosh\FilamentRating\RatingTheme;
 
 class RatingResource extends Resource
 {
-    protected static ?string $model = Rating::class;
+    protected static ?string $model = \App\Models\Rating::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $slug = 'calificacion';
@@ -46,16 +49,27 @@ class RatingResource extends Resource
             return false;
         }
     }
+
+    public static function getForm():array
+    {
+        return [
+                TextInput::make('request_id')
+                    ->label('Solicitud'),
+                TextInput::make('influencer_id')
+                    ->label('Influencer'),
+                TextInput::make('studio_id')
+                    ->label('Compañia'),
+                Rating::make('rate')
+                    ->label('Puntuación')
+                    ->theme(RatingTheme::HalfStars)
+                    ->stars(5)
+                    ->color('primary'),
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                TextInput::make('influencer_id'),
-                TextInput::make('studio_id'),
-                TextInput::make('request_id'),
-                TextInput::make('rate'),
-
-            ]);
+            ->schema(self::getForm());
     }
 
     public static function table(Table $table): Table
@@ -65,7 +79,7 @@ class RatingResource extends Resource
                 TextColumn::make('influencer_id'),
                 TextColumn::make('studio_id'),
                 TextColumn::make('request_id'),
-                TextColumn::make('rate'),
+                RatingColumn::make('rate'),
 
             ])
             ->filters([

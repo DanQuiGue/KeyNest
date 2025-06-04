@@ -16,6 +16,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -49,41 +50,94 @@ class RequestResource extends Resource
             return false;
         }
     }
-    public static function form(Form $form): Form
+
+    public static function adminForm():array
     {
-        return $form
-            ->schema([
+        return [
                 Select::make('influencer_id')
                     ->relationship('influencer','name'),
                 Select::make('game_id')
                     ->relationship('game','title')
                     ->reactive()
+                    ->label('Juego')
                     ->afterStateUpdated(function (callable $set, $state) {
                         $firstAvailableKeyId = Key::where('used', false)->where('game_id', $state)->value('id');
                         dd($firstAvailableKeyId);
                         $set('key_id', $firstAvailableKeyId);
                     }),
                 Hidden::make('key_id'),
-                Select::make('status'),
+                Select::make('status')
+                    ->label('Estado')
+                    ->options([
+                        'pending'=>'Pendiente',
+                        'accepted'=>'Aceptada',
+                        'rejected'=>'Denegada',
+                        'complete'=>'Completa'
+                    ]),
+                ];
+    }
 
-            ]);
+    public static function userForm():array
+    {
+        return [
+                Hidden::make('influencer_id')
+                    ->default(Auth::user()->id),
+                Select::make('game_id')
+                    ->relationship('game','title')
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $firstAvailableKeyId = Key::where('used', false)->where('game_id', $state)->value('id');
+                        $set('key_id', $firstAvailableKeyId);
+                    }),
+                Hidden::make('key_id'),
+                ];
+    }
+
+
+    public static function form(Form $form): Form
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==1){
+            return $form
+            ->schema(self::adminForm());
+        }else{
+            return $form
+            ->schema(self::userForm());
+        }
+
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('influencer_id'),
-                TextColumn::make('game_id'),
+                TextColumn::make('influencer.name'),
+                TextColumn::make('game.title'),
                 //TextColumn::make('key_id'),
-                TextColumn::make('status'),
-
+                TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending'  => 'gray',
+                        'accepted' => 'success',
+                        'rejected' => 'danger',
+                        'complete' => 'info',
+                        default    => 'secondary',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending'  => 'Pendiente',
+                        'accepted' => 'Aceptada',
+                        'rejected' => 'Denegada',
+                        'complete' => 'Completa',
+                        default    => ucfirst($state),
+                    })
             ])
             ->filters([
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
