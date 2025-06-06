@@ -16,6 +16,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,16 +41,6 @@ class RequestResource extends Resource
         return 'Solicitudes';
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        $user = Auth::user();
-        $id=$user->roles->first()->id;
-        if($id==3 || $id==1){
-            return true;
-        }else{
-            return false;
-        }
-    }
 
     public static function adminForm():array
     {
@@ -93,7 +84,52 @@ class RequestResource extends Resource
                 ];
     }
 
-
+    public static function companyForm():array
+    {
+        return [
+                Select::make('influencer_id')
+                    ->relationship('influencer','name')
+                    ->disabled()
+                    ->dehydrated(true),
+                Select::make('game_id')
+                    ->relationship('game','title')
+                    ->reactive()
+                    ->label('Juego')
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $firstAvailableKeyId = Key::where('used', false)->where('game_id', $state)->value('id');
+                        dd($firstAvailableKeyId);
+                        $set('key_id', $firstAvailableKeyId);
+                    })
+                    ->disabled()
+                    ->dehydrated(true),
+                Hidden::make('key_id'),
+                Select::make('status')
+                    ->label('Estado')
+                    ->options([
+                        'pending'=>'Pendiente',
+                        'accepted'=>'Aceptada',
+                        'rejected'=>'Denegada',
+                        'complete'=>'Completa'
+                    ]),
+                ];
+    }
+    public static function getActions():array
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==1){
+            return [
+                EditAction::make(),
+                DeleteAction::make()
+            ];
+        }if($id==2){
+            return[
+                EditAction::make(),
+            ];
+        }else{
+            return[];
+        }
+    }
     public static function form(Form $form): Form
     {
         $user = Auth::user();
@@ -101,6 +137,10 @@ class RequestResource extends Resource
         if($id==1){
             return $form
             ->schema(self::adminForm());
+        }
+        if($id==2){
+            return $form
+            ->schema(self::companyForm());
         }else{
             return $form
             ->schema(self::userForm());
@@ -110,6 +150,8 @@ class RequestResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
         return $table
             ->columns([
                 TextColumn::make('influencer.name'),
@@ -136,14 +178,13 @@ class RequestResource extends Resource
             ->filters([
 
             ])
-            ->actions([
-                EditAction::make(),
-            ])
+            ->actions(self::getActions())
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->recordUrl(fn ($record) => $id === 1 ? route('filament.admin.resources.solicitud.edit', $record) : null);
     }
 
     public static function getRelations(): array

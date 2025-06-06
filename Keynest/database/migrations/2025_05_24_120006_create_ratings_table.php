@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('influencer_id');
             $table->unsignedBigInteger('studio_id');
             $table->unsignedBigInteger('request_id');
-            $table->integer('rate');
+            $table->unsignedSmallInteger('rate');
+            $table->string('observations')->nullable();
             $table->timestamps();
         });
     }

@@ -9,13 +9,21 @@ use Filament\Tables\Filters\SelectFilter;
 
 use App\Filament\Resources\RatingResource\Pages;
 use App\Filament\Resources\RatingResource\RelationManagers;
+use App\Models\Request;
+use App\Models\User;
 use Mokhosh\FilamentRating\Components\Rating;
 use Mokhosh\FilamentRating\Columns\RatingColumn;
 use Filament\Support\Colors\Color;
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -53,17 +61,44 @@ class RatingResource extends Resource
     public static function getForm():array
     {
         return [
-                TextInput::make('request_id')
-                    ->label('Solicitud'),
-                TextInput::make('influencer_id')
-                    ->label('Influencer'),
-                TextInput::make('studio_id')
-                    ->label('Compañia'),
+                Select::make('request_id')
+                    ->label('Solicitud')
+                    ->options(function () {
+                        return Request::whereIn('status', ['complete', 'accepted'])
+                            ->with(['influencer', 'game'])
+                            ->get()
+                            ->mapWithKeys(function ($request) {
+                                return [
+                                    $request->id => ($request->influencer?->name ?? 'Sin influencer') . ' - ' . ($request->game?->title ?? 'Sin juego'),
+                                ];
+                            });
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                        if ($state) {
+                            // Obtener el request con su relación
+                            $request = Request::with('influencer')->find($state);
+                            $set('influencer_id', $request?->influencer_id);
+                        } else {
+                            $set('influencer_id', null);
+                        }
+                    }),
+                Select::make('influencer_id')
+                    ->label('Influencer')
+                    ->disabled()
+                    ->relationship('influencer','name')
+                    ->reactive()
+                    ->dehydrated(true),
+                Hidden::make('studio_id')
+                    ->default(Auth::user()->id),
                 Rating::make('rate')
                     ->label('Puntuación')
                     ->theme(RatingTheme::HalfStars)
                     ->stars(5)
-                    ->color('primary'),
+                    ->color('warning')
+                    ->required(),
+                Textarea::make('observation')
+                    ->label('Observaciones')
         ];
     }
     public static function form(Form $form): Form
@@ -76,9 +111,15 @@ class RatingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('influencer_id'),
-                TextColumn::make('studio_id'),
-                TextColumn::make('request_id'),
+                TextColumn::make('influencer.name'),
+                TextColumn::make('studio.name'),
+                TextColumn::make('request.influencer.name')
+                    ->label('Solicitud')
+                    ->formatStateUsing(function ($record) {
+                        if (!$record->request) return '-';
+
+                        return ($record->request->influencer?->name ?? 'Sin influencer') . ' - ' . ($record->request->game?->title ?? 'Sin juego');
+                    }),
                 RatingColumn::make('rate'),
 
             ])
@@ -86,7 +127,8 @@ class RatingResource extends Resource
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
+                DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -25,4 +25,6 @@ class Rating extends Model
         return $this->belongsTo(Request::class);
     }
 
+
+
 }
