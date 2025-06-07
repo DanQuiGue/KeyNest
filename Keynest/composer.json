@@ -12,7 +12,8 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "mokhosh/filament-rating": "^1.4",
-        "sixtyfour-software/make-full-resource": "^1.0"
+        "sixtyfour-software/make-full-resource": "^1.0",
+        "tomatophp/filament-payments": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
