@@ -12,13 +12,16 @@ use App\Filament\Resources\GameResource\RelationManagers;
 use App\Filament\Resources\GameResource\RelationManagers\KeysRelationManager;
 use App\Models\Game;
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class GameResource extends Resource
 {
@@ -36,10 +39,13 @@ class GameResource extends Resource
     {
         return 'Juegos';
     }
-    public static function form(Form $form): Form
+
+    public static function getForm():array
     {
-        return $form
-            ->schema([
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==1){
+            return [
                 Select::make('company_id')
                     ->label('Compañia')
                     ->relationship('company','name'),
@@ -53,8 +59,44 @@ class GameResource extends Resource
                     ->searchable()
                     ->preload()
                     ->createOptionForm(GenderResource::getForm()),
+            ];
+        }else{
+            return [
+                Hidden::make('company_id')
+                    ->default($user->id),
+                TextInput::make('title')
+                    ->label('Titulo')
+                    ->required(),
+                Select::make('gender_id')
+                    ->label('Genero')
+                    ->required()
+                    ->relationship('gender','name')
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm(GenderResource::getForm()),
+            ];
+        }
 
-            ]);
+    }
+    public static function getAction(): array
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==3){
+            return[];
+        }else{
+            return[
+                EditAction::make(),
+                DeleteAction::make()
+            ];
+        }
+
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema(self::getForm());
     }
 
     public static function table(Table $table): Table
@@ -69,10 +111,7 @@ class GameResource extends Resource
             ->filters([
 
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                DeleteAction::make()
-            ])
+            ->actions(self::getAction())
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

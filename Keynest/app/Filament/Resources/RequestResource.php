@@ -88,7 +88,7 @@ class RequestResource extends Resource
     {
         return [
                 Select::make('influencer_id')
-                    ->relationship('influencer','name')
+                    ->relationship('influencer','nickname')
                     ->disabled()
                     ->dehydrated(true),
                 Select::make('game_id')
@@ -154,7 +154,7 @@ class RequestResource extends Resource
         $id=$user->roles->first()->id;
         return $table
             ->columns([
-                TextColumn::make('influencer.name'),
+                TextColumn::make('influencer.nickname'),
                 TextColumn::make('game.title'),
                 //TextColumn::make('key_id'),
                 TextColumn::make('status')

@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('surname')->nullable();
+            $table->string('nickname')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('type', ['company', 'user'])->default('user');
+            $table->enum('plan', ['free', 'pro','team'])->default('free');
+            $table->boolean('verified')->default('false');
             $table->rememberToken();
             $table->timestamps();
         });

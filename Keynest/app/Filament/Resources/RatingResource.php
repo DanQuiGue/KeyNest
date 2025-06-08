@@ -69,7 +69,7 @@ class RatingResource extends Resource
                             ->get()
                             ->mapWithKeys(function ($request) {
                                 return [
-                                    $request->id => ($request->influencer?->name ?? 'Sin influencer') . ' - ' . ($request->game?->title ?? 'Sin juego'),
+                                    $request->id => ($request->influencer?->nickname ?? 'Sin influencer') . ' - ' . ($request->game?->title ?? 'Sin juego'),
                                 ];
                             });
                     })

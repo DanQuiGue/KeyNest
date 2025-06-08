@@ -11,6 +11,7 @@ use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -20,9 +21,11 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -41,11 +44,19 @@ class UserResource extends Resource
     {
         return 'Usuarios';
     }
-
-    public static function form(Form $form): Form
+    public static function shouldRegisterNavigation(): bool
+        {
+            $user = Auth::user();
+            $id=$user->roles->first()->id;
+            if($id==1){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    public static function getForm():array
     {
-        return $form
-            ->schema([
+        return [
                 Select::make('type')
                     ->label('Tipo Usuario')
                     ->options([
@@ -60,15 +71,28 @@ class UserResource extends Resource
                 TextInput::make('surname')
                     ->label('Apellido')
                     ->visible(fn (Get $get) => $get('type') === 'user'),
+                TextInput::make('nickname')
+                    ->visible(fn (Get $get) => $get('type') === 'user'),
+                Select::make('plan')
+                    ->visible(fn (Get $get) => $get('type') === 'company')
+                    ->options([
+                        'free'=>'Free',
+                        'pro'=>'Pro',
+                        'team'=>'Team'
+                    ])
+                    ->default('free'),
                 TextInput::make('email')
                     ->email()
                     ->required(),
                 TextInput::make('password')
                     ->label('Contraseña')
-                    ->password()
-                    ->required(),
-
-            ]);
+                    ->password(),
+                    ];
+    }
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema(self::getForm());
     }
 
     public static function table(Table $table): Table
@@ -105,6 +129,8 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('verified')
+                    ->label('verificado')
             ])
             ->filters([
                 //
