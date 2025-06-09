@@ -138,6 +138,9 @@ class UserResource extends Resource
             ->actions([
                 EditAction::make(),
                 DeleteAction::make()
+                    ->before(function ($record){
+                        $record->roles()->detach();
+                    })
             ])
             ->bulkActions([
                 BulkActionGroup::make([

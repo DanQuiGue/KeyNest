@@ -25,6 +25,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
+    public function games()
+    {
+        return $this->hasMany(Game::class, 'company_id');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
