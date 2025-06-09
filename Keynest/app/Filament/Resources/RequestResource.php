@@ -41,7 +41,17 @@ class RequestResource extends Resource
         return 'Solicitudes';
     }
 
-
+    public static function shouldRegisterNavigation(): bool
+        {
+            $user = Auth::user();
+            $id=$user->roles->first()->id;
+            $verified=$user->verified;
+            if($id==3 && !$verified){
+                return false;
+            }else{
+                return true;
+            }
+        }
     public static function adminForm():array
     {
         return [
