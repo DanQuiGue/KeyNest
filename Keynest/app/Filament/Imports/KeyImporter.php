@@ -3,9 +3,13 @@
 namespace App\Filament\Imports;
 
 use App\Models\Key;
+use Carbon\Carbon;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class KeyImporter extends Importer
 {
@@ -22,12 +26,41 @@ class KeyImporter extends Importer
 
     public function resolveRecord(): ?Key
     {
-
         return new Key([
-            'game_id'=>$this->getOptions()['gameId'],
-            'key'=>$this->data['key'],
-            'used'=>false
+            'game_id' => $this->getOptions()['gameId'],
+            'key' => $this->data['key'],
+            'used' => false
         ]);
+    }
+
+    // Método que se ejecuta antes de iniciar la importación
+    public static function beforeImport(Import $import): void
+    {
+        $user = Auth::user();
+
+        // Obtener claves actuales del mes
+        $currentMonthKeys = Key::whereHas('game', function ($query) use ($user) {
+                $query->where('company_id', $user->id);
+            })
+            ->where('created_at', '>=', Carbon::now()->startOfMonth())
+            ->count();
+
+        // Total de filas a importar
+        $incomingKeys = $import->total_rows;
+        $maxKeys = 50;
+
+        if (($currentMonthKeys + $incomingKeys) > $maxKeys) {
+            $remaining = $maxKeys - $currentMonthKeys;
+
+            // Lanzar excepción de validación para detener la importación
+            throw ValidationException::withMessages([
+                'import' => [
+                    "Límite de claves alcanzado. Máximo {$maxKeys} claves por mes. " .
+                    "Actualmente tienes {$currentMonthKeys} claves. " .
+                    "Puedes agregar máximo {$remaining} claves más."
+                ]
+            ]);
+        }
     }
 
     public static function getCompletedNotificationBody(Import $import): string

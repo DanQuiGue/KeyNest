@@ -23,7 +23,10 @@ class KeysRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form
-            ->schema(KeyResource::getForm());
+            ->schema([
+                TextInput::make('key')->required(),
+                Toggle::make('used'),
+            ]);
     }
 
     public function table(Table $table): Table
