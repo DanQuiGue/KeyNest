@@ -33,7 +33,13 @@ class ProWidget extends Widget
                 ->where('used', true)
                 ->count();
 
-        $conversionRate = round(($redeemedKeysCount / $totalKeys) * 100) . '%';
+        if($totalKeys==0){
+            $conversionRate=0;
+        }else{
+            $conversionRate = round(($redeemedKeysCount / $totalKeys) * 100) . '%';
+        }
+
+
         return [
             'thisMonth' => $monthlyKeysCount,
             'maxKeys' => 200,

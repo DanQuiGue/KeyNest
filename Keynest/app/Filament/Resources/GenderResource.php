@@ -17,6 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class GenderResource extends Resource
 {
@@ -25,6 +26,16 @@ class GenderResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $slug = 'genero';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==3){
+            return false;
+        }else{
+            return true;
+        }
+    }
     public static function getModelLabel(): string
     {
         return 'Genero';

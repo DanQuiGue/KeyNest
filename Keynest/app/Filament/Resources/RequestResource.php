@@ -84,6 +84,7 @@ class RequestResource extends Resource
                 Hidden::make('influencer_id')
                     ->default(Auth::user()->id),
                 Select::make('game_id')
+                    ->label('Juego')
                     ->relationship('game','title')
                     ->reactive()
                     ->afterStateUpdated(function (callable $set, $state) {
@@ -98,9 +99,7 @@ class RequestResource extends Resource
     {
         return [
                 Select::make('influencer_id')
-                    ->relationship('influencer','nickname')
-                    ->disabled()
-                    ->dehydrated(true),
+                    ->relationship('influencer','nickname'),
                 Select::make('game_id')
                     ->relationship('game','title')
                     ->reactive()
@@ -166,7 +165,9 @@ class RequestResource extends Resource
             ->columns([
                 TextColumn::make('influencer.nickname'),
                 TextColumn::make('game.title'),
-                //TextColumn::make('key_id'),
+                TextColumn::make('display_key')
+                    ->label('Key')
+                    ->getStateUsing(fn ($record) => $record->status === 'accepted' ? $record->key?->key : ''),
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()

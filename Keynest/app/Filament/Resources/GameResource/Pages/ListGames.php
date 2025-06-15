@@ -13,9 +13,15 @@ class ListGames extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\CreateAction::make(),
-        ];
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==3){
+            return[];
+        }else{
+            return [
+                Actions\CreateAction::make(),
+            ];
+        }
     }
 
     protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder
@@ -23,12 +29,12 @@ class ListGames extends ListRecords
         $query = parent::getTableQuery();
 
         // Suponiendo que el usuario logueado tiene el company_id
-        $companyId = Auth::user()->id;
-
-        if($companyId==1 || $companyId==3){
-            return $query;
+        $id_role = Auth::user()->roles()->first()->id;
+        $id_user=Auth::user()->id;
+        if($id_role==2){
+            return $query->where('company_id', $id_user);
         }else{
-            return $query->where('company_id', $companyId);
+            return $query;
         }
 
     }

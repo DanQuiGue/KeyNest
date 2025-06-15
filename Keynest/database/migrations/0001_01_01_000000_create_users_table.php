@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('type', ['company', 'user'])->default('user');
             $table->enum('plan', ['free', 'pro','team'])->default('free');
-            $table->boolean('verified')->default('false');
+            $table->boolean('verified')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

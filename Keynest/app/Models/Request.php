@@ -27,4 +27,9 @@ class Request extends Model
         return $this->belongsTo(User::class)->where('type','user');
     }
 
+    public function getDisplayKeyAttribute()
+    {
+        return $this->status === 'accepted' ? $this->key?->key : null;
+    }
+
 }

@@ -4,6 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Filament\Widgets\FreeWidget;
 use App\Filament\Widgets\ProWidget;
+use App\Filament\Widgets\RootWidget;
+use App\Filament\Widgets\TeamWidget;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,13 +21,23 @@ class Dashboard extends Page
         return 'Estadísticas';
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        $id=$user->roles->first()->id;
+        if($id==3){
+            return false;
+        }else{
+            return true;
+        }
+    }
     protected function getHeaderWidgets(): array
     {
         $user = Auth::user();
         $id=$user->roles->first()->id;
         if($id==1){
             return [
-            // Tus widgets si eres administrador
+                RootWidget::class
             ];
         }if($id==2){
             if($user->plan=='free'){
@@ -38,7 +50,7 @@ class Dashboard extends Page
                 ];
             }if($user->plan=='team'){
                 return [
-                    // Tus widgets si eres empresa team
+                    TeamWidget::class
                 ];
             }else{
                 return [];

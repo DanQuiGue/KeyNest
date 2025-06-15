@@ -108,6 +108,7 @@ class GameResource extends Resource
                 TextColumn::make('gender.name'),
 
             ])
+            ->recordUrl(null)
             ->filters([
 
             ])

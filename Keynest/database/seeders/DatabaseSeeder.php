@@ -17,13 +17,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
+            UserSeeder::class,
+            GenderSeeder::class,
+            GameSeeder::class,
         ]);
         // User::factory(10)->create();
-        $user=User::create([
-            'name' => 'root',
-            'email' => 'root@root.com',
-            'password' => Hash::make('12345678'),
-        ]);
-        $user->roles()->attach(1); // superadmin
+
     }
 }
