@@ -24,7 +24,7 @@ class Request extends Model
 
     public function influencer()
     {
-        return $this->belongsTo(User::class)->where('type','user');
+        return $this->belongsTo(User::class);
     }
 
     public function getDisplayKeyAttribute()
