@@ -97,7 +97,7 @@ class RatingResource extends Resource
                     ->stars(5)
                     ->color('warning')
                     ->required(),
-                Textarea::make('observation')
+                Textarea::make('observations')
                     ->label('Observaciones')
         ];
     }

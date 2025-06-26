@@ -82,7 +82,9 @@ class RequestResource extends Resource
     {
         return [
                 Hidden::make('influencer_id')
-                    ->default(Auth::user()->id),
+                    ->default(Auth::user()->id)
+                    ->disabled()
+                    ->dehydrated(true),
                 Select::make('game_id')
                     ->label('Juego')
                     ->relationship('game','title')
@@ -99,7 +101,9 @@ class RequestResource extends Resource
     {
         return [
                 Select::make('influencer_id')
-                    ->relationship('influencer','nickname'),
+                    ->relationship('influencer','name')
+                    ->disabled()
+                    ->dehydrated(true),
                 Select::make('game_id')
                     ->relationship('game','title')
                     ->reactive()

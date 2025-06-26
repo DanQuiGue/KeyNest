@@ -17,6 +17,7 @@ class UserSeeder extends Seeder
         $root=User::create([
             'name' => 'root',
             'email' => 'root@root.com',
+            'nickname'=>'root',
             'password' => Hash::make('12345678'),
         ]);
         $root->roles()->attach(1); // superadmin
